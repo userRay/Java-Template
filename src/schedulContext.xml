@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
+	default-autowire="byName">
+
+	<!-- CRC指标采集类 -->
+	<bean id="collectCrcErrTaskClass" class="cn.com.starit.task.CollectCrcErrTask"/>
+	
+	<!-- CRC指标采集任务 -->
+	<bean name="collectCrcErrCodeTask"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="collectCrcErrTaskClass" />
+		<property name="targetMethod">
+			<value>run</value> <!-- 采集方法的入口 -->
+		</property>
+		<property name="concurrent">
+			<value>false</value>
+		</property>
+	</bean>
+	
+	<!-- 定义CRC指标采集的时间，每天早上7点和下午8 -->
+	<bean id="collectCrcErrCode" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="collectCrcErrCodeTask" />
+		<property name="cronExpression">
+			<value>0 0 6,17 * * ?</value><!--每天7:00和17:00执行 -->
+		</property>
+	</bean>
+
+	<bean id="startQuertz" lazy-init="false" autowire="no"
+        class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+				<ref bean="collectCrcErrCode"/> <!-- 采集CRC误码指标的任务 -->
+            </list>
+        </property>
+    </bean>
+</beans>

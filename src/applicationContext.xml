@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation=" http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+	<!--
+	<import resource="schedulContext.xml"/>
+	--> 
+	<import resource="spring-hibernate.xml"/> 
+	
+	<bean id="hibernateSessionFactory" class="cn.com.starit.utils.HibernateSessionFactory">
+		<property name="sessionfactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean id="baseDao" class="cn.com.starit.dao.impl.BaseDaoImpl" >
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean id="oltLoginServiceImpl" class="cn.com.starit.service.impl.OltLoginServiceImpl">
+		<property name="baseDao" ref="baseDao"></property>
+	</bean>
+	<!-- 日志 -->
+	<bean id="getDevLogImpl" class="cn.com.starit.service.impl.getDevLogImpl">
+		<property name="baseDao" ref="baseDao"></property>
+	</bean>
+	<!-- 新日志 -->
+	<bean id="oltLogSavaService" class="cn.com.starit.service.impl.OltLogSavaService">
+		<property name="baseDao" ref="baseDao"></property>
+	</bean>
+	
+	<!--网管登录信息查询  -->
+	<bean id="ftpFileBakServiceImpl" class="cn.com.starit.service.impl.FtpFileBakServiceImpl">
+		<property name="baseDao" ref="baseDao"></property>
+	</bean>
+	
+	<bean id="oltPollChildServiceImpl" class="cn.com.starit.service.impl.OltPollChildServiceImpl">
+		<property name="baseDao" ref="baseDao"></property>
+	</bean>
+	
+	<bean id="crcErrCodeServiceImpl" class="cn.com.starit.service.impl.CrcErrCodeServiceImpl">
+		<property name="baseDao" ref="baseDao"></property>
+	</bean>
+	
+	<bean id="unLoginOltServiceImpl" class="cn.com.starit.service.impl.UnLoginOltServiceImpl">
+		<property name="baseDao" ref="baseDao"></property>
+	</bean>
+	
+	<bean id="oltPollingServiceImpl" class="cn.com.starit.service.impl.OltPollingServiceImpl">
+		<property name="baseDao" ref="baseDao"></property>
+	</bean>
+	
+	<bean id="collectCRCErrorCode" class="cn.com.starit.coll.CollectCRCErrorCode">
+		<property name="oltLoginService" ref="oltLoginServiceImpl"></property>
+		<property name="crcErrCodeService" ref="crcErrCodeServiceImpl"></property>
+	</bean>
+	
+	<bean id="telnetClient" class="javatelnet.DefaultTelnetClient" scope="prototype"></bean>
+	
+	<bean id="telnetSender" class="javatelnet.OltTelnetSender" scope="prototype">
+		<property name="telnetClient" ref="telnetClient"></property>
+	</bean>
+	
+	<bean id="collectOltPolling" class="cn.com.starit.coll.CollectOltPolling">
+		<property name="oltLoginService" ref="oltLoginServiceImpl"></property>
+	</bean>
+	
+	<bean id="oltPollingTask" class="cn.com.starit.task.OltPollingTask">
+		<property name="collectOltPolling" ref="collectOltPolling"></property>
+	</bean>
+	
+	
+</beans>
